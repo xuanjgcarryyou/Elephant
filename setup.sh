@@ -119,16 +119,40 @@ fi
 echo ""
 echo "=== 3/5 Python 資料分析環境 ==="
 # pandas/pyarrow：主力；openpyxl/xlrd：新舊 Excel；duckdb：SQL 驗算用的第二種獨立寫法
-PY_PKGS=(pandas pyarrow openpyxl xlrd duckdb)   # import 名稱與 pip 套件名稱相同
+# 格式「import 名稱|pip 規格」（import 名稱和 pip 套件名稱相同）。
+# 大版本設上限，讓比賽當天裝到的跟彩排時同一代（2026-11-13 彩排：pandas 3.1.1、duckdb 2.0.0；
+# duckdb 2.0 就改過 API）。下限放寬：舊版 Python（例如 Ubuntu 22.04 的 3.10）裝不了 pandas 3，
+# 還能退回 2.x。其他套件 API 穩定，不設限。
+PY_PKGS=(
+    "pandas|pandas>=2,<4"
+    "pyarrow|pyarrow"
+    "openpyxl|openpyxl"
+    "xlrd|xlrd"
+    "duckdb|duckdb>=1,<3"
+)
+
+# 已安裝、而且大版本符合 pip 規格裡的 >=N、<N 就回傳 0
+py_pkg_ok() {
+    python3 -c '
+import importlib, re, sys
+mod, spec = sys.argv[1], sys.argv[2]
+major = int(re.match(r"\d+", importlib.import_module(mod).__version__).group())
+for op, n in re.findall(r"(>=|<)(\d+)", spec):
+    if op == ">=" and major < int(n):
+        sys.exit(1)
+    if op == "<" and major >= int(n):
+        sys.exit(1)
+' "$1" "$2" 2>/dev/null
+}
 
 if have python3; then
     python3 --version
     missing=()
-    for p in "${PY_PKGS[@]}"; do
-        python3 -c "import $p" 2>/dev/null || missing+=("$p")
+    for entry in "${PY_PKGS[@]}"; do
+        py_pkg_ok "${entry%%|*}" "${entry#*|}" || missing+=("${entry#*|}")
     done
     if [ ${#missing[@]} -gt 0 ]; then
-        echo "缺少：${missing[*]}，安裝中..."
+        echo "缺少或版本不符：${missing[*]}，安裝中..."
         python3 -m pip --version &> /dev/null || apt_install python3-pip
         # Ubuntu 23.04+ 會擋系統 Python 的 pip（PEP 668），失敗時改加 --break-system-packages
         python3 -m pip install --user -q "${missing[@]}" \
@@ -136,8 +160,13 @@ if have python3; then
             || warn "Python 套件安裝失敗：${missing[*]}"
         add_to_path "$HOME/.local/bin"
     fi
-    for p in "${PY_PKGS[@]}"; do
-        python3 -c "import $p; print('  $p', $p.__version__)" 2>/dev/null || warn "python3 無法 import $p"
+    for entry in "${PY_PKGS[@]}"; do
+        p="${entry%%|*}"
+        if py_pkg_ok "$p" "${entry#*|}"; then
+            python3 -c "import $p; print('  $p', $p.__version__)"
+        else
+            warn "python3 的 $p 不存在或版本不符（需要 ${entry#*|}）"
+        fi
     done
     if python3 -c "import sys; sys.path.insert(0, 'tools'); import tw; assert tw.region('台北') == '北部'" 2>/dev/null; then
         echo "  tools/tw.py 自我檢查通過"
@@ -226,7 +255,8 @@ cat <<EOF
 
        source ~/.bashrc; cd "$WORKDIR" && claude
 
-  2. 登入：有瀏覽器會自動開啟；沒有瀏覽器（SSH/遠端）時會印出網址，
-     到別台機器打開登入，再把驗證碼貼回終端機
+  2. 登入：claude 會印出一個網址，複製到瀏覽器新分頁打開、登入，再把驗證碼貼回終端機
+     （網頁終端機的貼上常是 Ctrl+Shift+V 或右鍵；網址很長會折行，要整段選到）
+     分頁關掉或斷線：重新進來後執行 cd "$WORKDIR" && claude -c，接回上一段對話
   3. 第一句話：「開局」——Claude 會依 CLAUDE.md 盤點 HDFS 資料並建立資料筆記
 EOF
