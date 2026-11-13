@@ -1,46 +1,54 @@
 # Elephant
 
-2026 金象杯資料分析競賽用。比賽現場在空的 Linux 上裝好 Claude Code，讓它在這個 repo 裡讀 HDFS 資料、解題。
+2026 金象杯資料分析競賽用。在空的 Linux 上裝好 Claude Code，讓它在這個 repo 裡讀 HDFS 資料、解題。
 
-## 開局
+## 空環境使用步驟
 
-repo 是 public，不需要任何 git 設定或登入，全程不用輸入。
+1. **進入比賽環境的網頁終端機。**
 
-**有 curl**：
+2. **取得 repo 並安裝**（兩種擇一，全程不用輸入）：
+   - 有 curl：
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/xuanjgcarryyou/Elephant/main/bootstrap.sh | bash
-```
+     ```bash
+     curl -fsSL https://raw.githubusercontent.com/xuanjgcarryyou/Elephant/main/bootstrap.sh | bash
+     ```
 
-**沒有 curl**（root 環境把 sudo 拿掉）：
+   - 出現 `curl: command not found` 時，改打這兩行（root 環境把 `sudo` 拿掉）：
 
-```bash
-sudo apt-get update && sudo apt-get install -y git
-git clone https://github.com/xuanjgcarryyou/Elephant.git ~/Elephant && bash ~/Elephant/bootstrap.sh
-```
+     ```bash
+     sudo apt-get update && sudo apt-get install -y git
+     git clone https://github.com/xuanjgcarryyou/Elephant.git ~/Elephant && bash ~/Elephant/bootstrap.sh
+     ```
 
-跑完後看最後的問題清單，有 ⚠️ 的先處理，然後貼上這一行（不要拆成 `exec bash -l` 加下一行，一起貼上時第二行會被吃掉）：
+3. **看安裝最後的問題清單**：顯示「全部完成，沒有問題」就繼續；有 ⚠️ 的先處理。
 
-```bash
-source ~/.bashrc; cd ~/Elephant && claude
-```
+4. **啟動 Claude**：整行一起貼上，不要拆成兩行。
 
-**登入**：`claude` 會印出網址，複製到瀏覽器新分頁登入，再把驗證碼貼回終端機。
+   ```bash
+   source ~/.bashrc; cd ~/Elephant && claude
+   ```
 
-- 網頁終端機的貼上常常是 Ctrl+Shift+V 或按右鍵。
-- 網址很長會折行，要整段選到。
-- 分頁關掉或斷線：重新進入後執行 `cd ~/Elephant && claude -c`，會接回上一段對話。
+5. **登入**：
+   - 複製終端機印出的網址，貼到瀏覽器新分頁打開。網址很長會折行，要整段選到。
+   - 登入後，把驗證碼貼回終端機。網頁終端機的貼上通常是 Ctrl+Shift+V 或按右鍵。
 
-## 解題
+6. **第一句話說「開局」**：Claude 會盤點 HDFS、把資料拉到 `data/`、寫好 `work/data-notes.md`。
 
-1. 第一句話說「開局」：Claude 會盤點 HDFS、把資料拉到 `data/`、寫好 `work/data-notes.md`。
-2. 每題直接貼題目原文：Claude 會回答案、假設、歧義和驗算，並記到 `answers.md`。
+7. **每題直接貼題目原文**：Claude 會回覆答案、假設、歧義和驗算，並記到 `answers.md`。
 
-提交判斷：
+8. **決定要不要交**：
+   - 只有一種合理解讀 → 直接交
+   - 有分歧 → 自己判斷採用哪個版本，或先交機率最高的版本
+   - 兩種獨立算法數字不一致 → 不要交，先查原因
 
-- 只有一種合理解讀 → 直接交
-- 有分歧 → 自己判斷採用哪個版本，或先交機率最高的版本
-- 兩種獨立算法數字不一致 → 不要交，先查原因
+## 出狀況時
+
+| 狀況 | 處理 |
+|---|---|
+| 分頁關掉或斷線 | 重新進入後執行 `cd ~/Elephant && claude -c`，會接回上一段對話 |
+| `claude: command not found` | 先執行 `source ~/.bashrc` 再試 |
+| 貼上沒反應 | 改用 Ctrl+Shift+V 或按右鍵貼上 |
+| repo 有更新、要重新安裝 | 執行 `bash ~/Elephant/bootstrap.sh`：會先拉最新版，再重跑安裝 |
 
 ## 檔案
 
