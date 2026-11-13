@@ -54,6 +54,7 @@ cd ~/Elephant && claude    # 一定要在 repo 目錄啟動，才會讀到 CLAUD
 - `tools/peek.py`：一個指令看完一份資料：編碼、欄位、缺值、疑似陷阱、合計列
 - `reference/taiwan_counties.csv`：22 縣市對照表，包含國發會分區、七大生活圈、是否離島、舊名
 - `.claude/settings.json`：常用指令免確認；HDFS 的寫入、刪除、搬移一律禁止
+- `rehearsal/HANDOFF.md`：賽前彩排用，給另一台電腦上的 Claude 看：怎麼用 Docker 模擬比賽現場、從頭跑一次整個流程
 
 ## 提交判斷原則
 
