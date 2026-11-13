@@ -25,14 +25,28 @@ apt_install() {
     run_root env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$@"
 }
 
-# 寫入 ~/.bashrc（不重複）
-add_bashrc() { grep -qsxF "$1" "$HOME/.bashrc" || echo "$1" >> "$HOME/.bashrc"; }
+# 寫入 shell 設定檔（不重複），兩個都要寫：
+# - ~/.bashrc：互動 shell 讀這個
+# - 登入設定檔：`bash -lc '...'`、`ssh 主機 '...'` 這類非互動的登入 shell 只會讀這個。
+#   Ubuntu 的 ~/.bashrc 開頭遇到非互動 shell 就 return，只寫 ~/.bashrc 的話它們讀不到
+# 登入設定檔照 bash 的順序取第一個存在的：~/.bash_profile → ~/.bash_login → ~/.profile（都沒有就建 ~/.profile）
+LOGIN_RC="$HOME/.profile"
+for f in "$HOME/.bash_profile" "$HOME/.bash_login"; do
+    [ -f "$f" ] && { LOGIN_RC="$f"; break; }
+done
+add_rc() {
+    local f
+    for f in "$HOME/.bashrc" "$LOGIN_RC"; do
+        grep -qsxF "$1" "$f" || echo "$1" >> "$f"
+    done
+}
 
-# 加入 PATH：這次執行立即生效，並寫入 ~/.bashrc 讓之後的 shell 也找得到
+# 加入 PATH：這次執行立即生效，並寫入 shell 設定檔讓之後的 shell 也找得到。
+# 寫進檔案的那行會先檢查，登入 shell 同時讀到登入設定檔和 ~/.bashrc 時才不會重複加
 add_to_path() {
     local dir="$1"
     case ":$PATH:" in *":$dir:"*) ;; *) export PATH="$dir:$PATH" ;; esac
-    add_bashrc "export PATH=\"$dir:\$PATH\""
+    add_rc "case \":\$PATH:\" in *\":$dir:\"*) ;; *) export PATH=\"$dir:\$PATH\" ;; esac"
 }
 
 node_major() {
@@ -73,8 +87,8 @@ else
 fi
 # 中文輸出不亂碼、時間以台灣時區為準
 export LANG=C.UTF-8 TZ=Asia/Taipei
-add_bashrc "export LANG=C.UTF-8"
-add_bashrc "export TZ=Asia/Taipei"
+add_rc "export LANG=C.UTF-8"
+add_rc "export TZ=Asia/Taipei"
 
 # ---------------------------------------------------------------------------
 echo ""
