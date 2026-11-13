@@ -56,7 +56,8 @@ source ~/.bashrc; cd ~/Elephant && claude    # 重新載入 PATH；一定要在 
 - `reference/taiwan_counties.csv`：22 縣市對照表，包含國發會分區、七大生活圈、是否離島、舊名
 - `.claude/settings.json`：常用指令免確認；HDFS 的寫入、刪除、搬移一律禁止
 - `rehearsal/HANDOFF.md`：賽前彩排用，給另一台電腦上的 Claude 看：怎麼用 Docker 模擬比賽現場、從頭跑一次整個流程
-- `rehearsal/REPORT-2026-11-13.md`：第一次彩排的結果：時間軸、發現的問題與修正、還沒解決的風險
+- `rehearsal/REPORT-2026-11-13.md`：第一次彩排的結果：時間軸、答案對照、發現的問題與修正、還沒解決的風險
+- `rehearsal/` 其他檔案：第一次彩排用的映像檔設定（`contest-image/`）、假資料產生器（`fakedata/`）、題目、標準答案、驅動腳本（`scripts/`）與原始紀錄（`logs/`）
 
 ## 提交判斷原則
 

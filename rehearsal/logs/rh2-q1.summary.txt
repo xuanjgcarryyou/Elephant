@@ -1,0 +1,52 @@
+label=q1 rc=0 elapsed=45s
+session=bcbb85a6-39ad-42a0-92d0-61722f3cd396 model=claude-opus-5-5 cwd=/home/player/Elephant permissionMode=default
+
+== 工具呼叫 7 次 ==
+  1 [ok ] Bash: cat docs/taiwan-regions.md; grep -n "def region\|def counties_in\|scheme\|_REGIONS\|ndc\|circle7\|outlying" tools/tw.py | head -40
+  2 [ok ] Write: /home/player/Elephant/work/q1.py
+  3 [ok ] Bash: python3 work/q1.py; python3 -c "import duckdb; print(duckdb.__version__)"
+  4 [ok ] Write: /home/player/Elephant/work/q1_check.py
+  5 [ok ] Bash: python3 work/q1_check.py
+  6 [ERR] Bash: ls answers.md 2>&1
+        → Exit code 2⏎ls: cannot access 'answers.md': No such file or directory
+  7 [ok ] Write: /home/player/Elephant/answers.md
+
+== 結果 ==
+subtype=success turns=8 duration=44s cost=$0.90
+permission_denials=0
+
+## 1. 答案
+
+| 區域 | 113 年觀光遊憩人次合計 |
+|---|---|
+| 北部 | **116,212,561** |
+| 中部 | **69,950,538** |
+| 南部 | **83,082,824** |
+| 東部 | **16,677,851** |
+
+## 2. 採用的假設
+- **期間**：113/01–113/12，12 個月都有資料。
+- **分區**：用國發會／主計總處的分法，也就是 `docs/taiwan-regions.md` 的預設，照決策規則第 3 條。
+  - 北部：北市、新北、基隆、桃園、竹市、竹縣、**宜蘭**
+  - 中部：中市、**苗栗**、彰化、南投、**雲林**
+  - 南部：南市、高雄、嘉市、嘉縣、屏東、**澎湖**
+  - 東部：花蓮、臺東
+  - 金門、連江屬「金馬」，不在四區之內，113 年合計 2,217,669，不算進答案。
+- **前處理**：排除「總計」列；台／臺寫法統一後才分組；先去掉千分位再加總。
+- **缺值**：**花蓮縣 113/04 的值是 `-`**，所以東部只加了 23 個月，沒有補值。另外連江縣 113/01、02 也缺，但它不在四區之內，不影響答案。
+- 答案是整數人次，不需要四捨五入。
+
+## 3. 歧義
+1. **澎湖算離島（北中南東＋離島）**：南部變成 **79,551,004**，其他三區不變。離島（澎湖＋金馬）合計 5,749,489。
+2. **七大生活圈**：這種分法沒有「北中南東」，跟題目的問法對不上，只列出來參考。北北基宜 86,102,687、桃竹苗 37,925,418、中彰投 53,803,135、雲嘉南 45,186,200、高屏 42,696,663、花東 16,677,851、澎金馬 5,749,489。
+3. **花蓮 4 月缺值**：如果出題者想要的是補值後的數字，東部會比上面高。但資料本身沒有這個值，我認為照官方原始資料直接加總最合理。
+
+## 4. 驗算
+- **主算法**：`work/q1.py`，用 pandas 搭配 `tw.py` 的 `normalize_county`、`region`、`to_number`、`roc_to_date`。
+- **驗算**：`work/q1_check.py`，用 duckdb SQL，完全不經過 `tw.py`：
+  - 區域對照照文件手寫；
+  - 自己用 `replace` 去千分位，並把台換成臺；
+  - 用 `TRY_CAST` 處理 `-`。
+- **結果**：四區的合計、筆數（84/60/72/24）、缺值數（東部 1）兩邊**完全一致**。
+
+答案已附加到 `answers.md`。另外，`work/inspect.py` 還沒刪，有空時請執行 `rm work/inspect.py`。

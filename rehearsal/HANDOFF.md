@@ -43,6 +43,7 @@ source ~/.bashrc; cd ~/Elephant && claude      # 登入 → 說「開局」→ �
 
 - 彩排用的東西（Dockerfile、假資料、標準答案）**放在 repo 外面**，例如跟 repo 同一層的 `elephant-rehearsal/`，不要 commit。原因是容器裡會 clone 這個 repo，標準答案如果在 repo 裡，容器內的 Claude 有可能看到。
 - 容器一律從 GitHub clone，所以修完 repo 要 push，下一輪才會生效。
+- 第一次彩排（2026-11-13）結束後，那一輪的映像檔設定、假資料產生器、題目、標準答案和紀錄已經放進 `rehearsal/`，見 `REPORT-2026-11-13.md`。再彩排的話，要換新的假資料和題目，標準答案照上面的規則放在 repo 外面。
 
 ## 步驟
 

@@ -17,6 +17,8 @@
 | 民國年、四捨五入、千分位、Big5、合計列、比率平均、去重、join | `docs/pitfalls.md` |
 | HDFS、Hive 表、parquet/orc、part 檔、Kerberos | `docs/hdfs.md` |
 
+`rehearsal/` 是賽前彩排的紀錄和假資料，跟比賽題目無關，不要讀。
+
 容易出錯的處理一律用 `tools/tw.py`，不要自己重寫（用法：`sys.path.insert(0, "tools"); from tw import *`）：
 
 - `normalize_county()`：臺／台、全形、空白、簡稱、英文名、舊縣名 → 標準縣市名

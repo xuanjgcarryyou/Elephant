@@ -1,0 +1,20 @@
+10:49:21 start q0-kaiju
+10:51:46 end q0-kaiju rc=0 elapsed=145s
+10:52:40 start q1
+10:53:25 end q1 rc=0 elapsed=45s
+10:53:25 start q2
+10:54:03 end q2 rc=0 elapsed=38s
+10:54:03 start q3
+10:54:55 end q3 rc=0 elapsed=52s
+10:54:55 start q4
+10:55:37 end q4 rc=0 elapsed=42s
+10:55:38 start q5
+10:55:48 end q5 rc=0 elapsed=10s
+10:57:30 start deny-test
+10:58:01 end deny-test rc=0 elapsed=31s
+10:58:45 start perm-test
+10:59:16 end perm-test rc=0 elapsed=31s
+10:59:40 start perm-wild
+11:00:15 end perm-wild rc=0 elapsed=35s
+11:00:16 start perm-accept
+11:00:45 end perm-accept rc=0 elapsed=29s

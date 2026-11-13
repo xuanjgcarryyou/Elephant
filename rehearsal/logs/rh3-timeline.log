@@ -1,0 +1,31 @@
+11:04:56 procs=[] files=[ ] data_files=0
+11:06:29 procs=[bash -l,] files=[ ] data_files=0
+11:06:38 procs=[apt-get update,bash -l,] files=[ ] data_files=0
+11:06:47 procs=[apt-get install,bash -l,] files=[ ] data_files=0
+11:07:29 procs=[apt-get install,bash -l,dpkg,] files=[ ] data_files=0
+11:07:34 procs=[bash -l,git clone,] files=[ Elephant ] data_files=0
+11:07:36 procs=[apt-get install,bash -l,bootstrap.sh,] files=[ Elephant ] data_files=0
+11:07:40 procs=[apt-get update,bash -l,bootstrap.sh,setup.sh,] files=[ Elephant ] data_files=0
+11:07:43 procs=[apt-get install,bash -l,bootstrap.sh,setup.sh,] files=[ Elephant ] data_files=0
+11:07:47 procs=[apt-get install,bash -l,bootstrap.sh,dpkg,setup.sh,] files=[ Elephant ] data_files=0
+11:07:49 procs=[bash -l,bootstrap.sh,install.sh,setup.sh,] files=[ Elephant ] data_files=0
+11:07:52 procs=[bash -l,bootstrap.sh,setup.sh,] files=[ Elephant ] data_files=0
+11:08:12 procs=[bash -l,bootstrap.sh,setup.sh,] files=[ Elephant .claude.json ] data_files=0
+11:08:15 procs=[apt-get install,bash -l,bootstrap.sh,setup.sh,] files=[ Elephant .local/bin/claude .claude.json ] data_files=0
+11:08:32 procs=[apt-get install,bash -l,bootstrap.sh,dpkg,setup.sh,] files=[ Elephant .local/bin/claude .claude.json ] data_files=0
+11:08:44 procs=[bash -l,bootstrap.sh,pip install,setup.sh,] files=[ Elephant .local/bin/claude .claude.json ] data_files=0
+11:09:00 procs=[bash -l,bootstrap.sh,setup.sh,] files=[ Elephant .local/bin/claude .claude.json ] data_files=0
+11:09:02 procs=[bash -l,] files=[ Elephant .local/bin/claude Elephant/work/env.md .claude.json ] data_files=0
+11:09:24 procs=[bash -l,claude,] files=[ Elephant .local/bin/claude Elephant/work/env.md .claude.json ] data_files=0
+11:09:46 procs=[bash -l,claude,] files=[ Elephant .local/bin/claude Elephant/work/env.md .claude.json .claude/.credentials.json ] data_files=0
+11:10:04 procs=[bash -l,] files=[ Elephant .local/bin/claude Elephant/work/env.md .claude.json .claude/.credentials.json ] data_files=0
+11:12:38 procs=[bash -l,claude -p ?????? --output-format stream-,] files=[ Elephant .local/bin/claude Elephant/work/env.md .claude.json .claude/.credentials.json ] data_files=0
+11:13:05 procs=[bash -l,claude -p ?????? --output-format stream-,] files=[ Elephant .local/bin/claude Elephant/work/env.md .claude.json .claude/.credentials.json ] data_files=98
+11:14:18 procs=[bash -l,claude -p ?????? --output-format stream-,] files=[ Elephant .local/bin/claude Elephant/work/env.md .claude.json .claude/.credentials.json Elephant/work/data-notes.md ] data_files=98
+11:14:32 procs=[bash -l,claude -p 113 ??????????????????????????,] files=[ Elephant .local/bin/claude Elephant/work/env.md .claude.json .claude/.credentials.json Elephant/work/data-notes.md ] data_files=98
+11:15:21 procs=[bash -l,claude -p 113 ??????????????????????????,] files=[ Elephant .local/bin/claude Elephant/work/env.md .claude.json .claude/.credentials.json Elephant/work/data-notes.md Elephant/answers.md ] data_files=98
+11:15:34 procs=[bash -l,claude -p 2024 ??? 2 ???????????????????,] files=[ Elephant .local/bin/claude Elephant/work/env.md .claude.json .claude/.credentials.json Elephant/work/data-notes.md Elephant/answers.md ] data_files=98
+11:16:01 procs=[bash -l,claude -p ??????????????????????????????,] files=[ Elephant .local/bin/claude Elephant/work/env.md .claude.json .claude/.credentials.json Elephant/work/data-notes.md Elephant/answers.md ] data_files=98
+11:16:39 procs=[bash -l,claude -p 113 ??? 6 ????????????????????,] files=[ Elephant .local/bin/claude Elephant/work/env.md .claude.json .claude/.credentials.json Elephant/work/data-notes.md Elephant/answers.md ] data_files=98
+11:17:24 procs=[bash -l,claude -p HDFS ??? /data/contest/daily_s,] files=[ Elephant .local/bin/claude Elephant/work/env.md .claude.json .claude/.credentials.json Elephant/work/data-notes.md Elephant/answers.md ] data_files=98
+11:17:39 procs=[bash -l,] files=[ Elephant .local/bin/claude Elephant/work/env.md .claude.json .claude/.credentials.json Elephant/work/data-notes.md Elephant/answers.md ] data_files=98

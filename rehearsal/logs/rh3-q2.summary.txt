@@ -1,0 +1,37 @@
+label=q2 rc=0 elapsed=27s
+session=e1cd5784-e4d8-491d-bed0-df46f6c20e22 model=claude-opus-5-5 cwd=/home/player/Elephant permissionMode=default
+
+== 工具呼叫 4 次 ==
+  1 [ok ] Write: /home/player/Elephant/work/q2.py
+  2 [ok ] Write: /home/player/Elephant/work/check_q2.py
+  3 [ok ] Bash: python3 work/q2.py && echo ---- && python3 work/check_q2.py
+  4 [ok ] Edit: /home/player/Elephant/answers.md
+
+== 結果 ==
+subtype=success turns=5 duration=26s cost=$0.88
+permission_denials=0
+
+## Q2
+
+**1. 答案**
+- 2024 年 2 月全部門市銷售總金額：**19,570,835 元**
+- 銷售金額最高的一天：**2024-02-10**，當天 1,118,812 元
+
+**2. 採用的假設**
+- **資料來源**：用 `daily_sales`（各門市每日銷售彙總），30 家門市、5 個商品類別全部加總。
+- **期間**：dt 從 2024-02-01 到 2024-02-29。2024 年是閏年，共 29 天，每天都有 150 筆，資料完整。
+- amount 沒有缺值，單位是新臺幣元，整數不需要四捨五入。
+- 最高日是「當天全部門市、全部類別的合計」最高的那一天。這一天是唯一的，沒有同分；第 2 名是 2/11 的 912,266 元，差距很大。
+
+**3. 歧義**
+- **改用 `transactions`（交易明細）計算**：2 月總金額是 964,832 元，有 17 筆金額缺值沒算進去，最高日一樣是 2024-02-10（44,479 元）。
+- 這份明細只有 1,972 筆，金額大約只有彙總表的 5%。它看起來是抽樣明細，而且題目問的是「全部門市的銷售總金額」，所以我判斷應該用彙總表 `daily_sales`。
+
+**4. 驗算**
+- 主算法 `work/q2.py`：pandas 讀整個分區目錄，篩選日期後用 groupby 加總。
+- 驗算 `work/check_q2.py`：用 pyarrow 逐一讀 `dt=2024-02-*` 目錄裡的 parquet 檔，日期直接取自目錄名稱，再用純 Python 迴圈累加。
+- 兩種寫法都得到總金額 19,570,835、最高日 2024-02-10（1,118,812），完全一致。
+
+**提交建議**：只有一種合理解讀，兩種算法也一致，可以直接交。
+
+已寫入 `answers.md`。
