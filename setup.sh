@@ -120,7 +120,7 @@ echo ""
 echo "=== 3/5 Python 資料分析環境 ==="
 # pandas/pyarrow：主力；openpyxl/xlrd：新舊 Excel；duckdb：SQL 驗算用的第二種獨立寫法
 # 格式「import 名稱|pip 規格」（import 名稱和 pip 套件名稱相同）。
-# 大版本設上限，讓比賽當天裝到的跟彩排時同一代（2026-11-13 彩排：pandas 3.1.1、duckdb 2.0.0；
+# 大版本設上限，讓比賽當天裝到的跟測試時同一代（2026-11 測試過：pandas 3.1.1、duckdb 2.0.0；
 # duckdb 2.0 就改過 API）。下限放寬：舊版 Python（例如 Ubuntu 22.04 的 3.10）裝不了 pandas 3，
 # 還能退回 2.x。其他套件 API 穩定，不設限。
 PY_PKGS=(
