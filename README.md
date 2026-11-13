@@ -30,9 +30,10 @@ git clone https://github.com/xuanjgcarryyou/Elephant.git ~/Elephant && bash ~/El
 跑完之後：
 
 ```bash
-exec bash -l               # 重新載入 PATH
-cd ~/Elephant && claude    # 一定要在 repo 目錄啟動，才會讀到 CLAUDE.md 和權限設定
+source ~/.bashrc; cd ~/Elephant && claude    # 重新載入 PATH；一定要在 repo 目錄啟動，才會讀到 CLAUDE.md 和權限設定
 ```
+
+不要改成 `exec bash -l` 再接一行 `claude`：兩行一起貼上時，`exec` 換掉 shell 之後，第二行會被吃掉。
 
 登入：有瀏覽器會自動開啟；SSH 或遠端環境會印出一個網址，到別台機器打開登入，再把驗證碼貼回來。
 

@@ -35,9 +35,8 @@ curl -fsSL https://raw.githubusercontent.com/xuanjgcarryyou/Elephant/main/bootst
 apt-get update && apt-get install -y git
 git clone https://github.com/xuanjgcarryyou/Elephant.git ~/Elephant && bash ~/Elephant/bootstrap.sh
 
-# 之後
-exec bash -l
-cd ~/Elephant && claude      # 登入 → 說「開局」→ 逐題貼題目
+# 之後（一行，不要拆成 exec bash -l 加下一行：一起貼上時第二行會被吃掉）
+source ~/.bashrc; cd ~/Elephant && claude      # 登入 → 說「開局」→ 逐題貼題目
 ```
 
 ## 工作目錄

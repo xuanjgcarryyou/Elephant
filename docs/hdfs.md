@@ -44,6 +44,16 @@ hdfs dfs -getmerge /path/dir/ data/merged.csv         # 把多個 part 檔合成
 beeline -u "jdbc:hive2://<host>:10000" -e "DESCRIBE FORMATTED db.table"
 ```
 
+用 duckdb 讀 Hive textfile（例如當作驗算的第二種寫法）。SQL 要放在一般字串，不能用 `r"""`，`'\x01'` 才會是真正的控制字元；duckdb 2.x 的查詢結果用 `.fetchall()` 或 `.df()` 取，不能用 `.fetchone()`：
+
+```python
+duckdb.sql("""
+    SELECT c2, SUM(c3) FROM read_csv('data/tbl/part-*', delim = '\x01', header = false, nullstr = '\\N', quote = '',
+                                     columns = {'c1': 'VARCHAR', 'c2': 'VARCHAR', 'c3': 'INTEGER'})
+    GROUP BY 1
+""").fetchall()
+```
+
 ## 大檔案
 
 - 先看 `-du -h`。幾 GB 以內，直接下載用 pandas。

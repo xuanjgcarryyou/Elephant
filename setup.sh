@@ -222,9 +222,11 @@ fi
 cat <<EOF
 
 下一步：
-  1. exec bash -l              # 重新載入 PATH（這支腳本改的 PATH 不會帶回目前的 shell）
-  2. cd "$WORKDIR" && claude   # 一定要在這個目錄啟動，才會讀到 CLAUDE.md 和權限設定
-  3. 登入：有瀏覽器會自動開啟；沒有瀏覽器（SSH/遠端）時會印出網址，
+  1. 貼上這一行：重新載入 PATH，並在 repo 目錄啟動 Claude（才會讀到 CLAUDE.md 和權限設定）
+
+       source ~/.bashrc; cd "$WORKDIR" && claude
+
+  2. 登入：有瀏覽器會自動開啟；沒有瀏覽器（SSH/遠端）時會印出網址，
      到別台機器打開登入，再把驗證碼貼回終端機
-  4. 第一句話：「開局」——Claude 會依 CLAUDE.md 盤點 HDFS 資料並建立資料筆記
+  3. 第一句話：「開局」——Claude 會依 CLAUDE.md 盤點 HDFS 資料並建立資料筆記
 EOF
