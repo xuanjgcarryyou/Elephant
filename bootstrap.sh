@@ -19,8 +19,7 @@ main() {
     have() { command -v "$1" &> /dev/null; }
     run_root() {
         if [ "$(id -u)" -eq 0 ]; then "$@"
-        elif have sudo; then sudo "$@"
-        else echo "❌ 需要 root 或 sudo 才能安裝套件：$*" >&2; return 1
+        else echo "❌ 需要 root 才能安裝套件（不使用 sudo）：$*" >&2; return 1
         fi
     }
 

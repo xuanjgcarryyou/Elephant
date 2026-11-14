@@ -14,9 +14,9 @@ WARNINGS=()
 warn() { echo "⚠️  $*"; WARNINGS+=("$*"); }
 have() { command -v "$1" &> /dev/null; }
 
-# 以 root 執行指令（已是 root 就直接跑，否則用 sudo）
-can_root() { [ "$(id -u)" -eq 0 ] || have sudo; }
-run_root() { if [ "$(id -u)" -eq 0 ]; then "$@"; else sudo "$@"; fi; }
+# 以 root 執行指令（已是 root 才跑；不使用 sudo，比賽機器通常沒有 sudo 權限）
+can_root() { [ "$(id -u)" -eq 0 ]; }
+run_root() { "$@"; }
 
 APT_UPDATED=0
 apt_install() {
@@ -153,7 +153,14 @@ if have python3; then
     done
     if [ ${#missing[@]} -gt 0 ]; then
         echo "缺少或版本不符：${missing[*]}，安裝中..."
-        python3 -m pip --version &> /dev/null || apt_install python3-pip
+        if ! python3 -m pip --version &> /dev/null; then
+            # 沒有 root 時改裝到家目錄：先試 ensurepip，再試 get-pip.py（舊版 Python 有各自版本的網址）
+            pyver="$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])')"
+            python3 -m ensurepip --user &> /dev/null \
+                || curl -fsSL "https://bootstrap.pypa.io/pip/$pyver/get-pip.py" | python3 - --user -q \
+                || curl -fsSL https://bootstrap.pypa.io/get-pip.py | python3 - --user -q \
+                || apt_install python3-pip
+        fi
         # Ubuntu 23.04+ 會擋系統 Python 的 pip（PEP 668），失敗時改加 --break-system-packages
         python3 -m pip install --user -q "${missing[@]}" \
             || python3 -m pip install --user -q --break-system-packages "${missing[@]}" \
