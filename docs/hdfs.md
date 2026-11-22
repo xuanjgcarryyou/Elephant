@@ -19,12 +19,27 @@ hdfs dfs -text /path/file.gz | head    # 壓縮檔、SequenceFile 用 -text，�
 
 ## 下載
 
+優先用 `tools/prefetch.py`：setup.sh 已經在背景自動跑過一次，開局用 `--wait` 看結果。
+
 ```bash
-hdfs dfs -get /path/dir data/                         # 保留目錄結構
+python3 tools/prefetch.py --wait                      # 等背景下載完成，印出清單
+python3 tools/prefetch.py /path/dir /other/file.csv   # 手動下載（平行、已下載的跳過、自動跑 peek）
+```
+
+- 本機路徑 = `data` + HDFS 路徑：`/data/contest/sales` → `data/data/contest/sales`。
+- 它只 `ls -R` 一次、把能合併的目錄併成同一個 `-get`（每個 `-get` 都要啟動一次 JVM，約 1.5 秒），`-get` 用 `-t 16` 多執行緒，不同目錄的 `-get` 同時跑。
+- 自動模式會略過系統目錄（`/tmp`、`/system`、`/mr-history`…）和暫存／隱藏檔（`.Trash`、`.staging`、`_temporary`），總量上限 5 GB（環境變數 `PREFETCH_MAX_GB`），小的先抓。沒抓的會列在 `work/inventory.md`。
+
+自己下 `hdfs dfs` 指令時：
+
+```bash
+hdfs dfs -get -t 16 /path/dir data/path/              # 多執行緒（Hadoop 3.3+；舊版拿掉 -t）
 hdfs dfs -getmerge /path/dir/ data/merged.csv         # 把多個 part 檔合成一個
 ```
 
 用 `-getmerge` 合併時，**每個 part 檔如果都有表頭，合併後中間會夾雜表頭列**，要記得清掉。用 `peek.py` 讀整個目錄就不會有這個問題。
+
+沒有 `unzip` 時：`python3 -m zipfile -e data/x.zip data/x/`。
 
 ## 檔案格式
 
@@ -32,7 +47,7 @@ hdfs dfs -getmerge /path/dir/ data/merged.csv         # 把多個 part 檔合成
 |---|---|---|
 | `part-00000-*.parquet` 或 `*.snappy.parquet` | Parquet | `pd.read_parquet("data/dir/")` |
 | `*.orc`，或沒有副檔名、開頭是 `ORC` | ORC | `pyarrow.dataset.dataset(path, format="orc")` |
-| `part-00000`，用 `\x01` 分隔 | Hive textfile | `pd.read_csv(f, sep="\x01", header=None, na_values=["\\N"])` |
+| `part-00000` 或 `000000_0`，用 `\x01` 分隔 | Hive textfile（沒有表頭） | `pd.read_csv(f, sep="\x01", header=None, na_values=["\\N"])` |
 | `*.gz`、`*.bz2` | 壓縮文字 | pandas 會自動解壓 |
 | 目錄名稱是 `dt=2024-01-01/` | Hive 分區 | 見下方說明 |
 

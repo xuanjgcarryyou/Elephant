@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import re
 import sys
 import unicodedata
@@ -30,6 +31,8 @@ pd.set_option("display.max_colwidth", 40)
 
 TOTAL_PAT = re.compile(r"總計|合計|小計|總和|總數|^全國$|^臺灣地區$|^台灣地區$|^總$|^Total$", re.I)
 SKIP_FILES = re.compile(r"^(_|\.)|\.crc$")
+# 讀整個目錄時也跳過說明檔（README 等由 prefetch 另外列出）
+SKIP_DOCS = re.compile(r"^readme|\.(md|pdf|docx?)$", re.I)
 
 
 def h(title: str) -> None:
@@ -87,6 +90,9 @@ def count_lines(files: list[Path]) -> int:
 def load_text(files: list[Path], a) -> tuple[pd.DataFrame, dict]:
     enc = a.encoding or detect_encoding(files[0])
     sep = a.sep or detect_sep(files[0], enc)
+    if sep == "\x01" and not a.no_header:
+        a.no_header = True   # Hive textfile 一律沒有表頭
+        print("偵測到 \\x01 分隔（Hive textfile）：自動當作沒有表頭，欄位名稱要從 README / DESCRIBE 取得")
     print(f"編碼：{enc}　分隔符：{sep!r}　檔案數：{len(files)}")
     h("原始前 5 行（檢查表頭、多列表頭、註解列）")
     with files[0].open(encoding=enc, errors="replace") as fh:
@@ -112,9 +118,41 @@ def load_text(files: list[Path], a) -> tuple[pd.DataFrame, dict]:
     return df, {"raw_text": True, "total": total}
 
 
+def load_json(path: Path, a) -> pd.DataFrame:
+    """依序試：一般 JSON 表格 → JSON Lines（副檔名是 .json 但一行一筆）→ 巢狀結構裡最大的那個 list。"""
+    lines_first = path.suffix.lower() in (".jsonl", ".ndjson")
+    for lines in (lines_first, not lines_first):
+        try:
+            df = pd.read_json(path, lines=lines, nrows=a.nrows if lines else None, dtype=False)
+            print(f"JSON 格式：{'JSON Lines（一行一筆）' if lines else '一般 JSON'}")
+            return df
+        except ValueError:
+            pass
+    enc = detect_encoding(path)
+    with path.open(encoding=enc) as fh:
+        obj = json.load(fh)
+    # 政府開放資料常見 {"result": {"records": [...]}}：找出最大的 list
+    best_key, best = "", None
+    stack = [("", obj)]
+    while stack:
+        key, node = stack.pop()
+        if isinstance(node, list) and (best is None or len(node) > len(best)):
+            best_key, best = key, node
+        children = node.items() if isinstance(node, dict) else enumerate(node) if isinstance(node, list) else []
+        for k, v in children:
+            if isinstance(v, (dict, list)) and not (isinstance(node, list) and k > 0):
+                stack.append((f"{key}[{k!r}]", v))
+    if best is None:
+        return pd.json_normalize(obj)
+    print(f"JSON 格式：巢狀，資料在 {best_key or '最上層'}（{len(best):,} 筆），用 pd.json_normalize 攤平")
+    return pd.json_normalize(best)
+
+
 def load(path: Path, a) -> tuple[pd.DataFrame, dict]:
     if path.is_dir():
-        files = sorted(p for p in path.rglob("*") if p.is_file() and not SKIP_FILES.search(p.name))
+        files = sorted(p for p in path.rglob("*") if p.is_file()
+                       and not any(SKIP_FILES.search(part) for part in p.relative_to(path).parts)
+                       and not SKIP_DOCS.search(p.name))
         if not files:
             sys.exit(f"{path} 底下沒有資料檔")
         kind = sniff_kind(files[0])
@@ -142,9 +180,7 @@ def load(path: Path, a) -> tuple[pd.DataFrame, dict]:
         return df, {"raw_text": True, "total": None}
 
     if kind == "json":
-        lines = path.suffix.lower() in (".jsonl", ".ndjson")
-        df = pd.read_json(path, lines=lines, nrows=a.nrows if lines else None, dtype=False)
-        return df, {"raw_text": False, "total": None}
+        return load_json(path, a), {"raw_text": False, "total": None}
 
     return load_text(files, a)
 
