@@ -1,9 +1,13 @@
 {
   "permissions": {
+    "defaultMode": "dontAsk",
     "allow": [
       "Read",
       "Edit",
       "Write",
+      "Glob",
+      "Grep",
+      "Agent",
       "WebSearch",
       "WebFetch(domain:data.gov.tw)",
       "WebFetch(domain:www.ndc.gov.tw)",

@@ -372,6 +372,43 @@ job_hdfs() {
 }
 
 # ---------------------------------------------------------------------------
+# 背景工作 4：nano（使用者用它編輯 1.txt）。Ubuntu Server 通常已經有；
+# 沒有的話不需要 root 也能裝：只下載 .deb、解開到 ~/.local/nano
+
+job_nano() {
+    if have nano; then
+        echo "已經有，略過：$(command -v nano)"
+        return
+    fi
+    local tmp="$STATE/nano" deb="" f
+    mkdir -p "$tmp"
+    # 1. apt-get download 不需要 root（用系統現有的套件清單，只下載、不安裝）
+    if have apt-get; then
+        (cd "$tmp" && apt-get download -q nano > /dev/null 2>&1)
+        for f in "$tmp"/nano_*.deb; do [ -f "$f" ] && deb="$f"; done
+    fi
+    # 2. 系統的套件清單是空的：從 packages.ubuntu.com 查這個 Ubuntu 版本的檔名，再到官方 pool 下載
+    if [ -z "$deb" ]; then
+        local codename arch pool file
+        codename="$(. /etc/os-release 2> /dev/null && echo "${VERSION_CODENAME:-}")"
+        arch="$(dpkg --print-architecture 2> /dev/null || echo amd64)"
+        pool=http://archive.ubuntu.com/ubuntu
+        case "$arch" in amd64|i386) ;; *) pool=http://ports.ubuntu.com/ubuntu-ports ;; esac
+        file="$(fetch "https://packages.ubuntu.com/$codename/$arch/nano/download" 2> /dev/null \
+            | grep -o "nano_[^<\"/]*_$arch\.deb" | head -1)"
+        [ -n "$file" ] && fetch "$pool/pool/main/n/nano/$file" "$tmp/$file" && deb="$tmp/$file"
+    fi
+    if [ -n "$deb" ] && dpkg-deb -x "$deb" "$HOME/.local/nano"; then
+        ln -sf "$HOME/.local/nano/usr/bin/nano" "$HOME/.local/bin/nano"
+    fi
+    if have nano && nano --version > /dev/null 2>&1; then
+        echo "已裝到家目錄：$(command -v nano)"
+    else
+        warn "nano 安裝失敗，改用 vi 編輯題目：vi ~/Elephant/1.txt"
+    fi
+}
+
+# ---------------------------------------------------------------------------
 # 環境紀錄：Claude「開始」時會先讀這份，省掉重新偵測環境的時間。
 # setup 結束時寫一次；Python 比較晚裝完時，Python 那邊會再寫一次
 
@@ -404,9 +441,9 @@ write_env_md() {
 
 # ---------------------------------------------------------------------------
 echo ""
-echo "=== 2/3 同時安裝 Claude Code、Python 環境、檢查 HDFS（每完成一項就印出結果）==="
-JOBS=(claude python hdfs)
-declare -A TITLE=([claude]="Claude Code CLI" [python]="Python 資料分析環境" [hdfs]="HDFS / Hadoop")
+echo "=== 2/3 同時安裝 Claude Code、Python 環境、nano，檢查 HDFS（每完成一項就印出結果）==="
+JOBS=(claude python hdfs nano)
+declare -A TITLE=([claude]="Claude Code CLI" [python]="Python 資料分析環境" [hdfs]="HDFS / Hadoop" [nano]="nano 編輯器")
 declare -A PID=()
 for j in "${JOBS[@]}"; do
     (
@@ -433,11 +470,11 @@ show_done() {
     done
 }
 shown=" "
-until [ -f "$STATE/claude.done" ] && [ -f "$STATE/hdfs.done" ]; do
+until [ -f "$STATE/claude.done" ] && [ -f "$STATE/hdfs.done" ] && [ -f "$STATE/nano.done" ]; do
     show_done
     sleep 0.3
 done
-wait "${PID[claude]}" "${PID[hdfs]}"
+wait "${PID[claude]}" "${PID[hdfs]}" "${PID[nano]}"
 show_done
 case "$shown" in
     *" python "*) ;;
@@ -472,7 +509,7 @@ fi
 
 cat <<EOF
 
-下一步：
+下一步（跟 Claude 只要講兩次話：「開始」和「go」）：
   1. 貼上這一行：重新載入 PATH，並在 repo 目錄啟動 Claude（才會讀到 CLAUDE.md 和權限設定）
 
        source ~/.bashrc; cd "$WORKDIR" && claude
@@ -480,6 +517,8 @@ cat <<EOF
   2. 登入：claude 會印出一個網址，複製到瀏覽器新分頁打開、登入，再把驗證碼貼回終端機
      （網頁終端機的貼上常是 Ctrl+Shift+V 或右鍵；網址很長會折行，要整段選到）
      分頁關掉或斷線：重新進來後執行 cd "$WORKDIR" && claude -c，接回上一段對話
-  3. 第一句話：「開始」——HDFS 資料已經在背景下載，Claude 會接手拉完資料、看懂每份資料
-  4. 把第 1～10 題放進 $WORKDIR/1.txt，跟 Claude 說「做題」：全部算完後一次寫進 answer.md
+  3. 跟 Claude 說「開始」：它會把 HDFS 資料拉完、看懂每份資料
+  4. 同時另開一個終端機分頁：nano $WORKDIR/1.txt，把第 1～10 題貼進去存檔（Ctrl+O、Enter、Ctrl+X）
+  5. 回到 Claude 說「go」：全部算完後一次寫進 answer.md
+  6. 在另一個分頁看答案：nano $WORKDIR/answer.md
 EOF
